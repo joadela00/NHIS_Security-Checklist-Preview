@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 - 보안점검표</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --nhis-red: #e60012;
+            --nhis-blue: #0054a6;
+            --nhis-text: #333;
+            --nhis-border: #e2e2e2;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #eee;
+            color: var(--nhis-text);
+        }
+
+        .admin-header {
+            background-color: var(--white);
+            padding: 10px 20px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            border-bottom: 2px solid var(--nhis-red);
+            height: 70px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-img {
+            height: 50px;
+            object-fit: contain;
+        }
+
+        .header-title {
+            grid-column: 2;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #111;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 25px auto;
+            padding: 0 15px;
+        }
+
+        .stats-bar {
+            background: var(--white);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--nhis-border);
+            border-radius: 4px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        select {
+            padding: 8px 12px;
+            border: 1px solid var(--nhis-border);
+            outline: none;
+            border-radius: 4px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            grid-column: 3;
+            justify-self: end;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            border-radius: 4px;
+        }
+
+        .btn-red {
+            background: var(--nhis-red);
+            color: white;
+        }
+
+        .btn-outline {
+            background: white;
+            border: 1px solid #777;
+            color: #333;
+        }
+
+        .btn-gray {
+            background: #666;
+            color: white;
+        }
+
+        .table-area {
+            background: white;
+            border: 1px solid var(--nhis-border);
+            overflow-x: auto;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
+        th,
+        td {
+            padding: 12px 6px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+
+        th {
+            background: #f8f8f8;
+            color: #555;
+            font-weight: 700;
+            border-top: 1px solid #333;
+        }
+
+        .badge {
+            padding: 3px 6px;
+            border-radius: 2px;
+            font-weight: 700;
+            font-size: 0.73rem;
+        }
+
+        .badge-ok {
+            color: #007e33;
+            background: #e8f5e9;
+        }
+
+        .badge-no {
+            color: #cc0000;
+            background: #ffebee;
+        }
+
+        .badge-type {
+            color: #0054a6;
+            border: 1px solid #0054a6;
+            font-weight: 500;
+        }
+
+        .sig-thumbnail {
+            max-height: 35px;
+            border: 1px solid #ddd;
+        }
+
+        #recordList tr {
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        #recordList tr:hover {
+            background-color: #fff9f9 !important;
+        }
+
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-body {
+            background: white;
+            padding: 25px;
+            border-radius: 4px;
+            position: relative;
+            max-width: 90%;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .edit-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .edit-form .full-width {
+            grid-column: 1 / span 2;
+        }
+
+        .edit-form label {
+            font-size: 0.7rem;
+            color: #666;
+            font-weight: 700;
+            margin-bottom: 2px;
+            display: block;
+        }
+
+        .edit-form input,
+        .edit-form select {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .edit-sig-preview {
+            width: 100%;
+            height: 80px;
+            border: 1px solid #ddd;
+            background: #f9f9f9;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .edit-sig-preview img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .edit-sig-preview span {
+            font-size: 0.7rem;
+            color: #999;
+        }
+
+        /* Signature Modal Styles (Same as index.html) */
+        #signatureModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            flex-direction: column;
+        }
+
+        .sig-modal-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #fff;
+        }
+
+        .sig-modal-body {
+            flex: 1;
+            position: relative;
+            background: #fff;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sig-notice {
+            padding: 10px 20px;
+            background: #fff5f5;
+            color: var(--nhis-red);
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-bottom: 1px solid #fed7d7;
+            text-align: center;
+        }
+
+        #modalSignatureCanvas {
+            flex: 1;
+            width: 100%;
+            display: block;
+            touch-action: none;
+            cursor: crosshair;
+        }
+
+        .sig-modal-footer {
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+            background: #1a1a1a;
+        }
+
+        .btn-sig-clear,
+        .btn-sig-submit {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .btn-sig-clear {
+            background: #444;
+            color: #fff;
+        }
+
+        .btn-sig-submit {
+            background: var(--nhis-red);
+            color: #fff;
+        }
+
+        .btn-sig-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        @media print {
+            @page {
+                size: landscape;
+                margin: 5mm;
+            }
+
+            .btn-group,
+            .stats-bar,
+            .admin-header,
+            .table-area,
+            .storage-monitor,
+            #modal,
+            #signatureModal,
+            #pdfOptionsModal,
+            #pdfPreviewModal {
+                display: none !important;
+            }
+
+            .official-table {
+                page-break-after: always;
+            }
+
+            .official-table:last-child {
+                page-break-after: auto !important;
+            }
+
+            /* 대시보드 테이블의 마지막 열(관리)만 숨기기 */
+            .table-area th:last-child,
+            .table-area td:last-child {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+
+            .container {
+                margin: 0;
+                padding: 0;
+                max-width: none;
+            }
+
+            #officialFormArea {
+                display: block !important;
+            }
+        }
+
+        /* Official Form Styles */
+        #officialFormArea {
+            display: none;
+            background: white;
+            width: 100%;
+            border: 1.5px solid #000;
+        }
+
+        .official-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .official-table th,
+        .official-table td {
+            border: 1px solid #000;
+            font-size: 8pt;
+            padding: 2px 2px;
+            text-align: center;
+            height: 28px;
+            white-space: nowrap;
+            overflow: hidden;
+            color: #000;
+        }
+
+        .official-table th {
+            background: #fff !important;
+            font-weight: 700;
+            height: 25px;
+            color: #000 !important;
+        }
+
+        .diagonal-cell {
+            position: relative;
+            width: 80px;
+            height: 50px !important;
+            background: #fff !important;
+        }
+
+        .diag-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top right, transparent calc(50% - 0.5px), #000, transparent calc(50% + 0.5px));
+            z-index: 1;
+        }
+
+        .diag-text {
+            position: relative;
+            z-index: 2;
+            font-weight: 800;
+            font-size: 10pt;
+            color: #000 !important;
+        }
+
+
+        .bg-gray-light {
+            background: #fafafa;
+        }
+
+        .font-bold {
+            font-weight: 700;
+        }
+
+        @media (max-width: 600px) {
+            .admin-header {
+                grid-template-columns: auto 1fr;
+                height: 60px;
+                padding: 5px 15px;
+            }
+
+            .header-title {
+                font-size: 1.1rem;
+                grid-column: 2;
+                justify-self: center;
+                margin-right: 40px;
+            }
+
+            .logo-img {
+                height: 35px;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+
+        /* Storage Monitor Styles */
+        .storage-monitor {
+            background: white;
+            padding: 15px 20px;
+            margin-top: 20px;
+            border: 1px solid var(--nhis-border);
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .storage-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .progress-container {
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--nhis-blue);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .storage-info {
+            margin-top: 8px;
+            color: #666;
+            font-size: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* 하단 안내 문구 스타일 */
+        .print-footer {
+            display: none;
+            margin-top: 10px;
+            font-size: 8pt;
+            line-height: 1.4;
+            color: #000;
+            text-align: left;
+            border-top: 1px solid #000;
+            padding-top: 8px;
+        }
+
+        @media print {
+            .print-footer {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-header">
+        <div class="logo-area">
+            <img src="logo.png" alt="인천경기지역본부 로고" class="logo-img">
+        </div>
+        <div class="header-title">보안점검표</div>
+        <div class="btn-group">
+            <a href="index.html" class="btn btn-outline">점검표 홈</a>
+            <button onclick="exportOfficialPDF()" class="btn btn-gray">PDF</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats-bar">
+            <div class="filter-group">
+                <label style="font-weight:700; font-size:0.9rem;">점검 날짜 선택:</label>
+                <div style="display:flex; gap:5px; align-items:center;">
+                    <input type="date" id="dateSelector" onchange="renderRecords(true)"
+                        style="padding:5px; border:1px solid #ddd; border-radius:4px;">
+                    <button onclick="renderRecords(true)" class="btn btn-outline"
+                        style="padding:5px 10px; font-size:0.8rem;">새로고침</button>
+                </div>
+            </div>
+        </div>
+        <div id="statusCount" style="font-weight:700; color:var(--nhis-red); font-size:0.9rem;">조회중...</div>
+    </div>
+
+    <div class="table-area">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 20%;">제출일시</th>
+                    <th style="width: 20%;">층</th>
+                    <th style="width: 20%;">직급</th>
+                    <th style="width: 20%;">성명</th>
+                    <th style="width: 20%;">서명</th>
+                </tr>
+            </thead>
+            <tbody id="recordList"></tbody>
+        </table>
+    </div>
+
+
+
+    <!-- Official Form View (Hidden by default, used for export) -->
+    <div id="officialFormArea">
+        <table class="official-table">
+            <thead>
+                <tr>
+                    <th rowspan="2" class="diagonal-cell">
+                        <div class="diag-line"></div>
+                        <span class="diag-text">월/일</span>
+                    </th>
+
+                    <th colspan="2">화재 단속<br>상태</th>
+                    <th colspan="2">소등 및 각종<br>전원 상태</th>
+                    <th colspan="2">서류보관<br>/잠금장치 상태</th>
+                    <th colspan="2">문단속<br>상태</th>
+                    <th rowspan="2" style="width:30px;">비고</th>
+                    <th colspan="3">최종퇴청자</th>
+                    <th colspan="3">당직근무자</th>
+                    <th colspan="3">결 재</th>
+                </tr>
+                <tr>
+                    <th>최종<br>퇴청자</th>
+                    <th>당직<br>근무자</th>
+                    <th>최종<br>퇴청자</th>
+                    <th>당직<br>근무자</th>
+                    <th>최종<br>퇴청자</th>
+                    <th>당직<br>근무자</th>
+                    <th>최종<br>퇴청자</th>
+                    <th>당직<br>근무자</th>
+                    <th>직급</th>
+                    <th>성명</th>
+                    <th>점검시간</th>
+                    <th>직급</th>
+                    <th>성명</th>
+                    <th>점검시간</th>
+                    <th>담당</th>
+                    <th>팀장</th>
+                    <th>부장</th>
+                </tr>
+            </thead>
+            <tbody id="officialBody"></tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="19"
+                        style="text-align:left; padding:10px 0; border:none; font-size:8pt; line-height:1.4;">
+                        <div style="margin-bottom: 3px;">* 점검사항별로 이상이 있을 때에는 X표, 이상이 없을 때에는 O표를 한다.</div>
+                        <div style="margin-bottom: 3px;">* 점검결과 이상이 있을 때에는 비고란에 그 내용을 기재한다.</div>
+                        <div style="margin-top: 8px;">주1) 화재단속상태: 배선 주위에 인화물질이 있는지 여부 확인</div>
+                        <div>주2) 소등 및 각종 전원상태: 컴퓨터/프린터/복사기/선풍기 및 전열기(커피포트/전기히터 등)의 전원스위치 차단 여부 확인</div>
+                        <div>주3) 서류보관/잠금장치상태: 책상 위 서류방치 여부, 캐비닛 및 서랍장의 잠금 여부 확인</div>
+                        <div>주4) 문단속상태: 외부와 통하는 창문, 출입문 등의 잠금 여부 확인</div>
+                        <div style="margin-top: 5px;">주5) 「당직 및 비상근무 규칙」 제5조제4항에 따라 당직근무자를 두지 않는 경우 당직근무자란은 기록을 생략한다.
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    </div>
+
+    <div id="modal" onclick="this.style.display='none'">
+        <div class="modal-body" onclick="event.stopPropagation()">
+            <span class="close-btn" onclick="document.getElementById('modal').style.display='none'">&times;</span>
+            <div id="actionView" style="display:none; text-align:center;">
+                <h3 style="margin-bottom:20px; font-size:1.1rem; color:var(--nhis-red);">점검 기록 관리</h3>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <button class="btn btn-outline" style="padding:15px;" onclick="showSigFromAction()">서명 확대
+                        보기</button>
+                    <button class="btn btn-red" style="padding:15px;" onclick="openEditFromAction()">데이터 수정하기</button>
+                    <button class="btn btn-gray" style="padding:15px;" onclick="delFromAction()">기록 삭제하기</button>
+                </div>
+            </div>
+            <div id="sigView" style="display:none;">
+                <h3 style="margin-bottom:15px; font-size:1rem;">자필 서명 확대</h3>
+                <img id="sigLarge" src="" style="width:100%; border:1px solid #eee;">
+            </div>
+            <div id="editView" style="display:none; max-height: 80vh; overflow-y: auto;">
+                <h3
+                    style="margin-bottom:10px; font-size:1rem; color:var(--nhis-red); border-bottom: 2px solid #eee; padding-bottom:5px;">
+                    전체 데이터 수정</h3>
+
+                <div class="edit-form">
+                    <div class="full-width">
+                        <label>제출일시(날짜선택)</label>
+                        <input type="datetime-local" id="edit_submitTime" style="width: 60%;">
+                    </div>
+                    <div>
+                        <label>층</label>
+                        <select id="edit_department">
+                            <option value="1층">1층</option>
+                            <option value="2층">2층</option>
+                            <option value="3층">3층</option>
+                            <option value="4층">4층</option>
+                            <option value="5층">5층</option>
+                            <option value="6층">6층</option>
+                            <option value="7층">7층</option>
+                            <option value="8층">8층</option>
+                            <option value="별관2층">별관2층</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>점검자 구분</label>
+                        <select id="edit_checkerType">
+                            <option value="최종퇴청자">최종퇴청자</option>
+                            <option value="당직근무자">당직근무자</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>직급</label>
+                        <select id="edit_position">
+                            <option value="1">1급</option>
+                            <option value="2">2급</option>
+                            <option value="3">3급</option>
+                            <option value="4">4급</option>
+                            <option value="5">5급</option>
+                            <option value="6">6급</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>성명</label>
+                        <input type="text" id="edit_userName">
+                    </div>
+                    <div class="full-width" style="margin-top:5px; border-top:1px dashed #ddd; padding-top:10px;">
+                        <label>서명 (클릭하여 수정)</label>
+                        <div class="edit-sig-preview" id="editSigPreviewArea">
+                            <img id="editSigPreviewImg" src="" style="display:none;">
+                            <span id="editSigHint">서명을 필히 확인바랍니다.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="edit-form" id="editFormArea"
+                    style="margin-top:10px; background:#f4f4f4; padding:10px; border-radius:4px;"></div>
+
+                <div style="display: flex; justify-content: center; gap: 10px; margin-top:20px;">
+                    <button class="btn btn-outline" style="flex:1;"
+                        onclick="document.getElementById('modal').style.display='none'">취소</button>
+                    <button class="btn btn-red" style="flex:2;" onclick="saveChanges()">변경 사항 저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="signatureModal">
+        <div class="sig-modal-header">
+            <h3>자필 서명</h3>
+            <button type="button" class="btn-sig-close" id="btnSigClose">&times;</button>
+        </div>
+        <div class="sig-modal-body">
+            <div class="sig-notice">서명란에 성함을 정자(正字)로 모두 기재 바랍니다.</div>
+            <canvas id="modalSignatureCanvas"></canvas>
+        </div>
+        <div class="sig-modal-footer">
+            <button type="button" class="btn-sig-clear" id="btnSigClear">지우기</button>
+            <button type="button" class="btn-sig-submit" id="btnSigSubmit">확인</button>
+        </div>
+    </div>
+
+    <!-- PDF 출력 옵션 모달 -->
+    <div id="pdfOptionsModal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 2000; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 25px; border-radius: 4px; width: 450px; max-width: 90%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0;">PDF 인쇄 옵션</h3>
+                <button onclick="document.getElementById('pdfOptionsModal').style.display='none'" class="btn-sig-close"
+                    style="color:#333; font-size:1.5rem;">&times;</button>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight:bold; display:block; margin-bottom:8px;">대상 부서(층) 선택</label>
+                <select id="pdfFloorSelector"
+                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size:1rem;">
+                    <option value="1층">1층</option>
+                    <option value="2층">2층</option>
+                    <option value="3층">3층</option>
+                    <option value="4층">4층</option>
+                    <option value="5층">5층</option>
+                    <option value="6층">6층</option>
+                    <option value="7층">7층</option>
+                    <option value="8층">8층</option>
+                    <option value="별관2층">별관 2층</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight:bold; display:block; margin-bottom:8px;">인쇄 기간 선택 (시작일 ~ 종료일)</label>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="date" id="pdfStartDate"
+                        style="flex:1; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:0.9rem;">
+                    <span style="font-weight:bold;">~</span>
+                    <input type="date" id="pdfEndDate"
+                        style="flex:1; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:0.9rem;">
+                </div>
+            </div>
+            <div style="display: flex; justify-content: center; gap: 10px; margin-top:30px;">
+                <button class="btn btn-outline" style="flex:1;"
+                    onclick="document.getElementById('pdfOptionsModal').style.display='none'">취소</button>
+                <button class="btn btn-blue" style="flex:1; font-weight:bold;" onclick="directPDFExport()">PDF
+                    저장/인쇄</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF 인쇄 미리보기 모달 -->
+    <div id="pdfPreviewModal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 2000; justify-content: center; align-items: center;">
+        <div
+            style="background: white; padding: 20px; border-radius: 4px; width: 95vw; height: 95vh; display: flex; flex-direction: column; position: relative;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #333; padding-bottom: 10px;">
+                <h3 style="margin: 0; color: #333; font-size: 1.2rem;">PDF 인쇄 미리보기</h3>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="document.getElementById('pdfPreviewModal').style.display='none'"
+                        class="btn btn-outline">닫기</button>
+                    <button onclick="executePrint()" class="btn btn-blue" style="background:#0054a6; color:white;">인쇄
+                        진행하기 (PDF 저장)</button>
+                </div>
+            </div>
+            <div id="pdfPreviewContent"
+                style="flex: 1; overflow: auto; background: #e0e0e0; display: flex; justify-content: center; padding: 20px;">
+                <!-- 이 안에 표가 복사됨 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Google Apps Script 웹 앱 URL을 여기에 입력하세요 (index.html과 동일한 URL).
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbwTOa0hwUC7JnLKTpN9ErW5FIbnrcO3Wc13oz_Qedu6u6jGyCYOi_mK8eBqObkskjNH/exec';
+        const FLOORS = ['1층', '2층', '3층', '4층', '5층', '6층', '7층', '8층', '별관2층'];
+        let currentId = null;
+        let cachedData = []; // 구글 드라이브에서 불러온 데이터 캐시
+
+        // 공통 날짜 포맷 함수 (YYYY-MM-DD)
+        const getYYYYMMDD = (dVal) => {
+            if (!dVal) return "";
+            if (dVal instanceof Date) {
+                const y = dVal.getFullYear();
+                const m = String(dVal.getMonth() + 1).padStart(2, '0');
+                const d = String(dVal.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            }
+            let s = String(dVal).trim();
+
+            // ISO 8601 포맷 처리 (T 또는 Z 포함 시)
+            if (s.includes('T') || s.includes('Z')) {
+                try {
+                    const dObj = new Date(s);
+                    if (!isNaN(dObj.getTime())) {
+                        const y = dObj.getFullYear();
+                        const m = String(dObj.getMonth() + 1).padStart(2, '0');
+                        const d = String(dObj.getDate()).padStart(2, '0');
+                        return `${y}-${m}-${d}`;
+                    }
+                } catch (e) { }
+            }
+
+            // 일반 문자열 처리 (. / - 공백 등)
+            s = s.replace(/\. /g, '-').replace(/\./g, '-').replace(/\//g, '-').replace(/ /g, '-');
+            const parts = s.split('-').filter(p => /^\d+$/.test(p));
+            if (parts.length >= 3) {
+                let y = parts[0];
+                if (y.length === 2) y = "20" + y; // 2자리 연도 보정
+                const m = parts[1].padStart(2, '0');
+                const d = parts[2].padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            }
+            return s.substring(0, 10);
+        };
+
+        // 데이터 병합 헬퍼 함수
+        function getMergedData() {
+            const localData = JSON.parse(localStorage.getItem('security_check_data') || '[]');
+            const combined = [...cachedData];
+            localData.forEach(lItem => {
+                // ID(타임스탬프)를 기준으로 중복 제거하며 병합
+                if (!combined.find(cItem => Number(cItem.id) === Number(lItem.id))) {
+                    combined.push(lItem);
+                }
+            });
+            // 최신순 정렬 (ID 내림차순)
+            return combined.sort((a, b) => Number(b.id) - Number(a.id));
+        }
+
+        async function renderRecords(forceRefresh = false) {
+            const selectedDate = document.getElementById('dateSelector').value;
+            const list = document.getElementById('recordList');
+
+            if (GAS_URL && !GAS_URL.includes('YOUR_GAS_WEB_APP_URL_HERE')) {
+                if (forceRefresh || cachedData.length === 0) {
+                    list.innerHTML = '<tr><td colspan="5" style="padding:40px;">데이터를 불러오는 중입니다...</td></tr>';
+                    try {
+                        const response = await fetch(`${GAS_URL}?t=${Date.now()}`);
+                        cachedData = await response.json();
+                        console.log('구글 데이터 로드 완료:', cachedData.length, '건');
+                    } catch (err) {
+                        console.error('Fetch error:', err);
+                        list.innerHTML = '<tr><td colspan="5" style="padding:40px; color:red;">구글 데이터를 불러오지 못했습니다. 로컬 데이터를 대신 사용합니다.</td></tr>';
+                    }
+                }
+            }
+
+            // 병합된 데이터 사용
+            const data = getMergedData();
+
+            // 선택된 날짜의 데이터만 필터링
+            const filtered = data.filter(i => {
+                const finalDate = getYYYYMMDD(i.checkDate);
+                const dateMatches = (finalDate === selectedDate);
+                if (dateMatches) {
+                    console.log(`[날짜 일치] ${i.department} (제출일: ${finalDate})`);
+                }
+                return dateMatches;
+            });
+
+            list.innerHTML = '';
+            let completedCount = 0;
+            const totalCount = FLOORS.length;
+
+            // 모든 층을 순회하며 데이터 유무 확인 및 렌더링
+            FLOORS.forEach(floor => {
+                const tr = document.createElement('tr');
+                const targetDept = String(floor).replace(/\s/g, '');
+
+                // 해당 층의 최신 데이터 찾기
+                const item = [...filtered].reverse().find(i => {
+                    return String(i.department || '').replace(/\s/g, '') === targetDept;
+                });
+
+                if (item) {
+                    completedCount++;
+                    tr.onclick = () => showRecordActions(item);
+
+                    // 제출일시 표시 (Number 변환으로 안정성 확보)
+                    const d = new Date(Number(item.id));
+                    let formattedDate = "";
+                    if (!isNaN(d.getTime())) {
+                        const month = d.getMonth() + 1;
+                        const date = d.getDate();
+                        const hh = String(d.getHours()).padStart(2, '0');
+                        const min = String(d.getMinutes()).padStart(2, '0');
+                        formattedDate = `${month}/${date} ${hh}:${min}`;
+                    } else {
+                        // 변환 실패 시 submitTime 문자열 그대로 또는 일부 추출
+                        formattedDate = String(item.submitTime || '-').split('오후')[0].split('오전')[0].trim();
+                    }
+
+                    tr.innerHTML = `
+                        <td>${formattedDate}</td>
+                        <td style="font-weight:bold; color:var(--nhis-blue);">${floor}</td>
+                        <td>${item.position}급</td>
+                        <td>${item.userName}</td>
+                        <td><img src="${item.signature}" class="sig-thumbnail"></td>
+                    `;
+                } else {
+                    tr.style.backgroundColor = '#f9f9f9';
+                    tr.style.cursor = 'default';
+                    tr.innerHTML = `
+                        <td style="color:#ccc;">-</td>
+                        <td style="font-weight:bold; color:#777;">${floor}</td>
+                        <td colspan="3" style="color:var(--nhis-red); font-weight:bold;">미점검</td>
+                    `;
+                }
+                list.appendChild(tr);
+            });
+
+            // 현황 카운트 업데이트 (루프 완료 후)
+            document.getElementById('statusCount').innerText = `${selectedDate} 현황 (${completedCount}/${totalCount} 완료)`;
+        }
+
+        let currentItem = null;
+
+        function showRecordActions(item) {
+            currentItem = item;
+            document.getElementById('actionView').style.display = 'block';
+            document.getElementById('sigView').style.display = 'none';
+            document.getElementById('editView').style.display = 'none';
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function showSigFromAction() {
+            showSig(currentItem.signature);
+        }
+
+        function openEditFromAction() {
+            openEdit(currentItem.id);
+        }
+
+        async function delFromAction() {
+            await del(currentItem.id);
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        function showSig(src) {
+            document.getElementById('actionView').style.display = 'none';
+            document.getElementById('sigView').style.display = 'block';
+            document.getElementById('editView').style.display = 'none';
+            document.getElementById('sigLarge').src = src;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        // 서명 모달 로직
+        const sigModal = document.getElementById('signatureModal');
+        const modalCanvas = document.getElementById('modalSignatureCanvas');
+        const modalCtx = modalCanvas.getContext('2d');
+        const btnSigClear = document.getElementById('btnSigClear');
+        const btnSigSubmit = document.getElementById('btnSigSubmit');
+        const btnSigClose = document.getElementById('btnSigClose');
+        const editSigPreviewArea = document.getElementById('editSigPreviewArea');
+        const editSigPreviewImg = document.getElementById('editSigPreviewImg');
+        const editSigHint = document.getElementById('editSigHint');
+
+        let isDrawing = false;
+        let hasSignature = false;
+        let currentEditingSig = null;
+
+        function initModalCanvas() {
+            const resize = () => {
+                const r = window.devicePixelRatio || 1;
+                modalCanvas.width = window.innerWidth * r;
+                modalCanvas.height = (window.innerHeight - 250) * r;
+                modalCtx.scale(r, r);
+                modalCtx.strokeStyle = '#222';
+                modalCtx.lineWidth = 3;
+                modalCtx.lineCap = 'round';
+            };
+            window.addEventListener('resize', resize);
+            resize();
+
+            const getPos = (e) => {
+                const rect = modalCanvas.getBoundingClientRect();
+                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+                return { x, y };
+            };
+
+            const start = (e) => {
+                isDrawing = true;
+                modalCtx.beginPath();
+                const p = getPos(e);
+                modalCtx.moveTo(p.x, p.y);
+                hasSignature = true;
+            };
+
+            const move = (e) => {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const p = getPos(e);
+                modalCtx.lineTo(p.x, p.y);
+                modalCtx.stroke();
+            };
+
+            const stop = () => { isDrawing = false; };
+
+            modalCanvas.addEventListener('mousedown', start);
+            modalCanvas.addEventListener('mousemove', move);
+            window.addEventListener('mouseup', stop);
+            modalCanvas.addEventListener('touchstart', start, { passive: false });
+            modalCanvas.addEventListener('touchmove', move, { passive: false });
+            modalCanvas.addEventListener('touchend', stop);
+
+            btnSigClear.addEventListener('click', () => {
+                modalCtx.clearRect(0, 0, modalCanvas.width, modalCanvas.height);
+                hasSignature = false;
+            });
+
+            btnSigClose.addEventListener('click', () => {
+                sigModal.style.display = 'none';
+                document.body.style.overflow = '';
+            });
+
+            btnSigSubmit.addEventListener('click', () => {
+                if (!hasSignature) {
+                    alert('서명을 해주세요.');
+                    return;
+                }
+                currentEditingSig = modalCanvas.toDataURL();
+                editSigPreviewImg.src = currentEditingSig;
+                editSigPreviewImg.style.display = 'block';
+                editSigHint.style.display = 'none';
+                sigModal.style.display = 'none';
+                document.body.style.overflow = '';
+            });
+
+            editSigPreviewArea.addEventListener('click', () => {
+                sigModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                modalCtx.clearRect(0, 0, modalCanvas.width, modalCanvas.height);
+                hasSignature = false;
+            });
+        }
+
+        function openEdit(id) {
+            currentId = id;
+            const data = JSON.parse(localStorage.getItem('security_check_data') || '[]');
+            const item = data.find(i => i.id === id);
+
+            document.getElementById('actionView').style.display = 'none';
+            document.getElementById('sigView').style.display = 'none';
+            document.getElementById('editView').style.display = 'block';
+
+            // 제출일시 포맷팅 (YYYY-MM-DDTHH:mm)
+            const dateObj = new Date(item.id);
+            const yyyy = dateObj.getFullYear();
+            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const dd = String(dateObj.getDate()).padStart(2, '0');
+            const hh = String(dateObj.getHours()).padStart(2, '0');
+            const min = String(dateObj.getMinutes()).padStart(2, '0');
+            document.getElementById('edit_submitTime').value = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+            document.getElementById('edit_department').value = item.department || '';
+            document.getElementById('edit_checkerType').value = item.checkerType || (item.items.item1?.type || '최종퇴청자');
+            document.getElementById('edit_position').value = item.position || '';
+            document.getElementById('edit_userName').value = item.userName || '';
+
+            currentEditingSig = item.signature;
+            editSigPreviewImg.src = currentEditingSig;
+            editSigPreviewImg.style.display = 'block';
+            editSigHint.style.display = 'none';
+
+            const area = document.getElementById('editFormArea');
+            area.innerHTML = '<label class="full-width" style="margin-bottom:5px;">점검 항목별 상태</label>';
+            const labels = ["1.화재 단속 상태", "2.소등 및 전원 상태", "3.서류보관 상태", "4.문단속 상태"];
+            for (let i = 1; i <= 4; i++) {
+                const itm = item.items[`item${i}`];
+                area.innerHTML += `<div><label>${labels[i - 1]}</label>
+                    <select id="edit_val_${i}">
+                        <option value="양호" ${itm.value === '양호' ? 'selected' : ''}>양호</option>
+                        <option value="불량" ${itm.value === '불량' ? 'selected' : ''}>불량</option>
+                    </select></div>`;
+            }
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        async function saveChanges() {
+            const data = JSON.parse(localStorage.getItem('security_check_data') || '[]');
+            const idx = data.findIndex(i => i.id === currentId);
+            if (idx === -1) return;
+
+            // 원본 데이터 복사 및 수정 사항 반영
+            const updatedItem = { ...data[idx] };
+            updatedItem.submitTime = document.getElementById('edit_submitTime').value;
+            updatedItem.department = document.getElementById('edit_department').value;
+            updatedItem.checkerType = document.getElementById('edit_checkerType').value;
+            updatedItem.position = document.getElementById('edit_position').value;
+            updatedItem.userName = document.getElementById('edit_userName').value;
+            updatedItem.signature = currentEditingSig;
+
+            // 점검 항목 업데이트
+            for (let i = 1; i <= 4; i++) {
+                if (updatedItem.items && updatedItem.items[`item${i}`]) {
+                    updatedItem.items[`item${i}`].value = document.getElementById(`edit_val_${i}`).value;
+                    updatedItem.items[`item${i}`].type = updatedItem.checkerType;
+                }
+            }
+
+            // 1. 로컬 스토리지 업데이트
+            data[idx] = updatedItem;
+            localStorage.setItem('security_check_data', JSON.stringify(data));
+
+            // 2. 구글 드라이브(GAS) 업데이트 알림 (기존 행 삭제 후 새 데이터 추가 방식)
+            if (GAS_URL && !GAS_URL.includes('YOUR_GAS_WEB_APP_URL_HERE')) {
+                try {
+                    // action: 'overwrite', oldId: currentId 를 포함하여 전송
+                    const submission = {
+                        ...updatedItem,
+                        action: 'overwrite',
+                        oldId: currentId
+                    };
+
+                    fetch(GAS_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify(submission)
+                    });
+
+                    // 관리자 페이지 내부 캐시(cachedData)도 즉시 반영
+                    const cacheIdx = cachedData.findIndex(i => i.id === currentId);
+                    if (cacheIdx !== -1) {
+                        cachedData[cacheIdx] = updatedItem;
+                    }
+                    console.log('구글 드라이브 업데이트 요청 전송 완료');
+                } catch (err) {
+                    console.error('Drive sync error:', err);
+                }
+            }
+
+            document.getElementById('modal').style.display = 'none';
+            alert('수정 사항이 저장되었습니다.');
+            location.reload();
+        }
+
+        async function del(id) {
+            if (!confirm('저장소에서도 삭제됩니다. 정말로 삭제하시겠습니까?')) return;
+
+            // 로컬 스토리지 삭제
+            const data = JSON.parse(localStorage.getItem('security_check_data') || '[]');
+            localStorage.setItem('security_check_data', JSON.stringify(data.filter(i => i.id !== id)));
+
+            // 구글 드라이브 삭제 전송
+            if (GAS_URL && !GAS_URL.includes('YOUR_GAS_WEB_APP_URL_HERE')) {
+                try {
+                    // mode: 'no-cors'를 쓰면 성공 여부를 알 순 없지만 전송은 됨. 
+                    // 하지만 삭제 확인을 위해 일반 fetch 고려 (CORS 설정 필수)
+                    await fetch(GAS_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        // text/plain을 사용하여 CORS preflight(사전 요청) 없이 전송
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify({ action: 'delete', id: id })
+                    });
+                    // 캐시 업데이트
+                    cachedData = cachedData.filter(i => i.id !== id);
+                } catch (err) {
+                    console.error('Delete error:', err);
+                    alert('구글 드라이브 삭제 요청 중 오류가 발생했습니다.');
+                }
+            }
+
+            alert('삭제되었습니다.');
+            location.reload();
+        }
+
+        function exportOfficialPDF() {
+            // 인쇄 옵션 모달 기본값 세팅 (일주일 전 ~ 오늘)
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const todayStr = `${yyyy}-${mm}-${dd}`;
+
+            const lastWeek = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
+            const lw_yyyy = lastWeek.getFullYear();
+            const lw_mm = String(lastWeek.getMonth() + 1).padStart(2, '0');
+            const lw_dd = String(lastWeek.getDate()).padStart(2, '0');
+            const lwStr = `${lw_yyyy}-${lw_mm}-${lw_dd}`;
+
+            document.getElementById('pdfStartDate').value = lwStr;
+            document.getElementById('pdfEndDate').value = todayStr;
+            document.getElementById('pdfFloorSelector').value = '1층';
+
+            document.getElementById('pdfOptionsModal').style.display = 'flex';
+        }
+
+        function generatePDFPreview() {
+            const startStr = document.getElementById('pdfStartDate').value;
+            const endStr = document.getElementById('pdfEndDate').value;
+            if (!startStr || !endStr) {
+                alert('인쇄 기간을 선택해주세요.');
+                return;
+            }
+            if (new Date(startStr) > new Date(endStr)) {
+                alert('시작일이 종료일보다 늦을 수 없습니다.');
+                return;
+            }
+
+            document.getElementById('pdfOptionsModal').style.display = 'none';
+
+            try {
+                preparePaginatedOfficialTable();
+
+                // 생성된 테이블들을 미리보기 모달에 복사
+                const previewContent = document.getElementById('officialFormArea').innerHTML;
+                document.getElementById('pdfPreviewContent').innerHTML = `<div style="background:white; padding:30px; width:1000px; box-shadow:0 0 10px rgba(0,0,0,0.5);">${previewContent}</div>`;
+                document.getElementById('pdfPreviewModal').style.display = 'flex';
+
+            } catch (e) {
+                alert('PDF 준비 중 오류가 발생했습니다: ' + e.message);
+                console.error(e);
+            }
+        }
+
+        function directPDFExport() {
+            const startStr = document.getElementById('pdfStartDate').value;
+            const endStr = document.getElementById('pdfEndDate').value;
+            if (!startStr || !endStr) {
+                alert('인쇄 기간을 선택해주세요.');
+                return;
+            }
+            if (new Date(startStr) > new Date(endStr)) {
+                alert('시작일이 종료일보다 늦을 수 없습니다.');
+                return;
+            }
+
+            document.getElementById('pdfOptionsModal').style.display = 'none';
+
+            try {
+                preparePaginatedOfficialTable();
+
+                // 테이블 렌더링을 위해 약간의 지연 후 인쇄 실행
+                setTimeout(() => {
+                    window.print();
+                }, 300);
+
+            } catch (e) {
+                alert('PDF 준비 중 오류가 발생했습니다: ' + e.message);
+                console.error(e);
+            }
+        }
+
+        function executePrint() {
+            document.getElementById('pdfPreviewModal').style.display = 'none';
+            // 모달이 닫힌 후 인쇄 창 띄우기
+            setTimeout(() => {
+                window.print();
+            }, 300);
+        }
+
+        function preparePaginatedOfficialTable() {
+            const data = getMergedData();
+            const targetFloor = document.getElementById('pdfFloorSelector').value;
+            const startStr = document.getElementById('pdfStartDate').value;
+            const endStr = document.getElementById('pdfEndDate').value;
+
+            const startDate = new Date(startStr);
+            const endDate = new Date(endStr);
+
+            const startYYYYMMDD = getYYYYMMDD(startStr);
+            const endYYYYMMDD = getYYYYMMDD(endStr);
+
+            // 해당 부서 및 날짜 범위 내 데이터 필터링
+            const filtered = data.filter(i => {
+                const deptMatch = String(i.department || '').replace(/\s/g, '') === targetFloor.replace(/\s/g, '');
+                if (!deptMatch) return false;
+
+                const itemDate = getYYYYMMDD(i.checkDate);
+                return itemDate >= startYYYYMMDD && itemDate <= endYYYYMMDD;
+            });
+
+            // 날짜별 그룹화 (키를 YYYY-MM-DD로 통일)
+            const grouped = {};
+            filtered.forEach(item => {
+                const dateKey = getYYYYMMDD(item.checkDate);
+                if (!dateKey) return;
+                if (!grouped[dateKey]) grouped[dateKey] = { '최종퇴청자': null, '당직근무자': null };
+                grouped[dateKey][item.checkerType] = item;
+            });
+
+            const area = document.getElementById('officialFormArea');
+            area.innerHTML = ''; // 기존 테이블 내용 삭제
+
+            let currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+            const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+
+            let currentTbody = null;
+
+            // 새로운 테이블 요소를 생성하는 헬퍼 함수
+            const createNewTable = () => {
+                const table = document.createElement('table');
+                table.className = 'official-table';
+                table.style.marginBottom = '15px';
+                table.style.width = '100%';
+
+                table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="diagonal-cell">
+                            <div class="diag-line"></div>
+                            <span class="diag-text">월/일</span>
+                        </th>
+                        <th colspan="2">화재 단속<br>상태</th>
+                        <th colspan="2">소등 및 각종<br>전원 상태</th>
+                        <th colspan="2">서류보관<br>/잠금장치 상태</th>
+                        <th colspan="2">문단속<br>상태</th>
+                        <th rowspan="2" style="width:30px;">비고</th>
+                        <th colspan="3">최종퇴청자</th>
+                        <th colspan="3">당직근무자</th>
+                        <th colspan="3">결 재</th>
+                    </tr>
+                    <tr>
+                        <th>최종<br>퇴청자</th>
+                        <th>당직<br>근무자</th>
+                        <th>최종<br>퇴청자</th>
+                        <th>당직<br>근무자</th>
+                        <th>최종<br>퇴청자</th>
+                        <th>당직<br>근무자</th>
+                        <th>최종<br>퇴청자</th>
+                        <th>당직<br>근무자</th>
+                        <!-- 최종퇴청자 세부 -->
+                        <th>직급</th>
+                        <th>성명</th>
+                        <th>점검시간</th>
+                        <!-- 당직근무자 세부 -->
+                        <th>직급</th>
+                        <th>성명</th>
+                        <th>점검시간</th>
+                        <!-- 결재 세부 -->
+                        <th>담당</th>
+                        <th>팀장</th>
+                        <th>부장</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <td colspan="19" style="text-align:left; padding:10px 0; border:none; font-size:8pt; line-height:1.4;">
+                            <div style="margin-bottom: 3px;">* 점검사항별로 이상이 있을 때에는 X표, 이상이 없을 때에는 O표를 한다.</div>
+                            <div style="margin-bottom: 3px;">* 점검결과 이상이 있을 때에는 비고란에 그 내용을 기재한다.</div>
+                            <div style="margin-top: 8px;">주1) 화재단속상태: 배선 주위에 인화물질이 있는지 여부 확인</div>
+                            <div>주2) 소등 및 각종 전원상태: 컴퓨터/프린터/복사기/선풍기 및 전열기(커피포트/전기히터 등)의 전원스위치 차단 여부 확인</div>
+                            <div>주3) 서류보관/잠금장치상태: 책상 위 서류방치 여부, 캐비닛 및 서랍장의 잠금 여부 확인</div>
+                            <div>주4) 문단속상태: 외부와 통하는 창문, 출입문 등의 잠금 여부 확인</div>
+                            <div style="margin-top: 5px;">주5) 「당직 및 비상근무 규칙」 제5조제4항에 따라 당직근무자를 두지 않는 경우 당직근무자란은 기록을 생략한다.</div>
+                        </td>
+                    </tr>
+                </tfoot>
+                `;
+                const tbody = document.createElement('tbody');
+                table.appendChild(tbody);
+                area.appendChild(table);
+                return tbody;
+            };
+
+            while (currentDate <= end) {
+                // 월요일(1)이면 새 테이블 생성, 또는 처음 시작 시
+                if (!currentTbody || currentDate.getDay() === 1) {
+                    currentTbody = createNewTable();
+                }
+
+                // 렌더링 날짜 문자열 준비
+                const yyyy = currentDate.getFullYear();
+                const mm = String(currentDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(currentDate.getDate()).padStart(2, '0');
+                const targetDateStr = `${yyyy}-${mm}-${dd}`;
+
+                // 데이터 찾기
+                let dayData = grouped[targetDateStr];
+                // 추가 백업 매칭 (필요 시)
+                if (!dayData) {
+                    const altKey = Object.keys(grouped).find(k => getYYYYMMDD(k) === targetDateStr);
+                    if (altKey) dayData = grouped[altKey];
+                }
+
+                const tr = document.createElement('tr');
+                const dayStr = `${Number(mm)}.${Number(dd)}.(${'일월화수목금토'[currentDate.getDay()]})<br><span style="font-size:0.7rem; color:#555;">${targetFloor}</span>`;
+
+                if (dayData) {
+                    const getVal = (type, itemKey) => {
+                        const submission = dayData[type];
+                        if (!submission) return '';
+                        const val = submission.items[itemKey]?.value || '';
+                        if (val === '양호') return 'O';
+                        if (val === '불량') return 'X';
+                        return val;
+                    };
+
+                    const getInfo = (type, infoKey) => {
+                        const submission = dayData[type];
+                        if (!submission) return '';
+                        if (infoKey === 'time') {
+                            const d = new Date(Number(submission.id));
+                            if (!isNaN(d.getTime())) {
+                                const hh = String(d.getHours()).padStart(2, '0');
+                                const min = String(d.getMinutes()).padStart(2, '0');
+                                return `${hh}:${min}`;
+                            }
+                            // 날짜 객체 변환 실패 시 submitTime에서 시간 추출 시도
+                            const timeMatch = String(submission.submitTime || '').match(/\d{1,2}:\d{2}/);
+                            return timeMatch ? timeMatch[0] : '';
+                        }
+                        if (infoKey === 'sig' && submission.signature) {
+                            return `<img src="${submission.signature}" style="max-height:20px;">`;
+                        }
+                        return submission[infoKey] || '';
+                    };
+
+                    tr.innerHTML = `
+                        <td class="font-bold" style="line-height:1.2;">${dayStr}</td>
+                        <!-- 화재 -->
+                        <td>${getVal('최종퇴청자', 'item1')}</td>
+                        <td>${getVal('당직근무자', 'item1')}</td>
+                        <!-- 전원 -->
+                        <td>${getVal('최종퇴청자', 'item2')}</td>
+                        <td>${getVal('당직근무자', 'item2')}</td>
+                        <!-- 보안 -->
+                        <td>${getVal('최종퇴청자', 'item3')}</td>
+                        <td>${getVal('당직근무자', 'item3')}</td>
+                        <!-- 문단속 -->
+                        <td>${getVal('최종퇴청자', 'item4')}</td>
+                        <td>${getVal('당직근무자', 'item4')}</td>
+                        <td></td>
+                        <!-- 최종퇴청자 -->
+                        <td>${getInfo('최종퇴청자', 'position')}</td>
+                        <td>${getInfo('최종퇴청자', 'sig') || getInfo('최종퇴청자', 'userName')}</td>
+                        <td>${getInfo('최종퇴청자', 'time')}</td>
+                        <!-- 당직근무자 -->
+                        <td>${getInfo('당직근무자', 'position')}</td>
+                        <td>${getInfo('당직근무자', 'sig') || getInfo('당직근무자', 'userName')}</td>
+                        <td>${getInfo('당직근무자', 'time')}</td>
+                        <!-- 결재 -->
+                        <td></td><td>전결</td><td></td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td class="font-bold" style="line-height:1.2;">${dayStr}</td>
+                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    `;
+                }
+
+                currentTbody.appendChild(tr);
+
+                // 다음 날
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        }
+
+
+
+
+
+
+
+        window.onload = () => {
+            // 날짜 필터 초기값을 오늘로 설정
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            document.getElementById('dateSelector').value = `${yyyy}-${mm}-${dd}`;
+
+            renderRecords();
+            initModalCanvas();
+        };
+
+        // 타 탭에서의 변경 사항 실시간 반영
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'security_check_data') {
+                renderRecords();
+            }
+        });
+    </script>
+</body>
+
+</html>
